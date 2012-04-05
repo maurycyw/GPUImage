@@ -206,9 +206,9 @@
 {
     CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
     CVImageBufferRef cameraFrame = CMSampleBufferGetImageBuffer(sampleBuffer);
+    
     int bufferWidth = CVPixelBufferGetWidth(cameraFrame);
     int bufferHeight = CVPixelBufferGetHeight(cameraFrame);
-
     CMTime currentTime = CMTimeMakeWithSeconds([[NSDate date] timeIntervalSinceDate:startingCaptureTime], 120);
     
     if ([GPUImageOpenGLESContext supportsFastTextureUpload])
@@ -216,6 +216,20 @@
         CVPixelBufferLockBaseAddress(cameraFrame, 0);
 
         [GPUImageOpenGLESContext useImageProcessingContext];
+        
+        // 12/04/04 (SCD) - get the max texture size, really critical for iPhone4 that sends a still image to large for GPU
+        int maxTextureSize;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+        
+        // 12/04/04 (SCD) - this is a temporary work around to crop the image to the max gpu bounds for textures
+        // todo [SCD] this is a possible entry for the tiling or higher up in the chain
+        if ( bufferHeight > maxTextureSize) {
+            bufferHeight = maxTextureSize;
+        }
+        if ( bufferWidth > maxTextureSize) {
+            bufferWidth = maxTextureSize;
+        }
+
         CVOpenGLESTextureRef texture = NULL;
         CVReturn err = CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, coreVideoTextureCache, cameraFrame, NULL, GL_TEXTURE_2D, GL_RGBA, bufferWidth, bufferHeight, GL_BGRA, GL_UNSIGNED_BYTE, 0, &texture);
                 

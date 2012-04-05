@@ -20,7 +20,7 @@
     }
     
     [self.captureSession beginConfiguration];
-
+    
     photoOutput = [[AVCaptureStillImageOutput alloc] init];
     [photoOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
     
