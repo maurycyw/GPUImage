@@ -29,6 +29,7 @@
 @implementation GPUImageView
 
 @synthesize sizeInPixels = _sizeInPixels;
+@synthesize framesPerSecond = _framesPerSecond;
 
 #pragma mark -
 #pragma mark Initialization and teardown
@@ -185,6 +186,8 @@
 
 - (void)newFrameReadyAtTime:(CMTime)frameTime;
 {
+    static NSDate *lastTime = nil;
+
     [GPUImageOpenGLESContext useImageProcessingContext];
     [self setDisplayFramebuffer];
     
@@ -217,6 +220,20 @@
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     [self presentFramebuffer];
+
+    NSTimeInterval elapsed = 0.f;
+    if (nil != lastTime) {
+        NSDate *now = [NSDate date];
+        elapsed = [now timeIntervalSinceDate:lastTime];
+        if (0. == elapsed) {
+            _framesPerSecond = 60.f;
+        } else {
+            _framesPerSecond = 1./elapsed;
+        }
+        lastTime = now;
+    } else {
+        lastTime = [NSDate date];
+    }
 }
 
 - (NSInteger)nextAvailableTextureIndex;

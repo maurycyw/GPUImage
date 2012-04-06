@@ -7,4 +7,9 @@
 
 @property(readonly, nonatomic) CGSize sizeInPixels;
 
+/**
+ * returns the instantaneous render frames per second.
+ */
+@property(readonly, nonatomic) float framesPerSecond;
+
 @end
