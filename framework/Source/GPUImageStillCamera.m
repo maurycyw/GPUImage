@@ -1,4 +1,5 @@
 #import "GPUImageStillCamera.h"
+#import <CoreImage/CoreImage.h>
 
 @interface GPUImageStillCamera ()
 {
@@ -23,7 +24,8 @@
     [self.captureSession beginConfiguration];
     
     photoOutput = [[AVCaptureStillImageOutput alloc] init];
-    [photoOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
+    //[photoOutput setOutputSettings:[NSDictionary dictionaryWithObject:[NSNumber numberWithInt:kCVPixelFormatType_32BGRA] forKey:(id)kCVPixelBufferPixelFormatTypeKey]];
+    [photoOutput setOutputSettings:[NSDictionary dictionaryWithObject:AVVideoCodecJPEG forKey:AVVideoCodecKey]];
     
     [self.captureSession addOutput:photoOutput];
     
@@ -58,26 +60,9 @@
 - (void)capturePhotoRawWithCompletionHandler:(void (^)(CGImageRef rawImageRef, NSError *error))block;
 {
     [photoOutput captureStillImageAsynchronouslyFromConnection:[[photoOutput connections] objectAtIndex:0] completionHandler:^(CMSampleBufferRef imageSampleBuffer, NSError *error) {
-
-        CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(imageSampleBuffer); 
-
-        CVPixelBufferLockBaseAddress(imageBuffer,0); 
-
-        uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(imageBuffer); 
-        size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer); 
-        size_t width = CVPixelBufferGetWidth(imageBuffer); 
-        size_t height = CVPixelBufferGetHeight(imageBuffer); 
-        
-        CVPixelBufferUnlockBaseAddress(imageBuffer,0);
-        
-        CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB(); 
-        CGContextRef newContext = CGBitmapContextCreate(baseAddress, width, height, 8, bytesPerRow, colorSpace,  kCGImageAlphaPremultipliedLast); 
-        CGImageRef newImage = CGBitmapContextCreateImage(newContext); 
-        
-        CGContextRelease(newContext); 
-        CGColorSpaceRelease(colorSpace);
-        block(newImage, error);
-        CGImageRelease(newImage);
+        NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageSampleBuffer];
+        UIImage *image = [UIImage imageWithData:jpegData];
+        block(image.CGImage, error);
     }];
     return;
 }
