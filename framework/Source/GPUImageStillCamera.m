@@ -56,12 +56,12 @@
     return;
 }
 
-- (void)capturePhotoRawWithCompletionHandler:(void (^)(CGImageRef rawImageRef, NSError *error))block;
+- (void)capturePhotoRawWithCompletionHandler:(void (^)(UIImage *image, NSError *error))block;
 {
     [photoOutput captureStillImageAsynchronouslyFromConnection:[[photoOutput connections] objectAtIndex:0] completionHandler:^(CMSampleBufferRef imageSampleBuffer, NSError *error) {
         NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageSampleBuffer];
         UIImage *image = [UIImage imageWithData:jpegData];
-        block(image.CGImage, error);
+        block(image, error);
     }];
     return;
 }
