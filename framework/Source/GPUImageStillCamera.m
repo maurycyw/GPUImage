@@ -58,9 +58,32 @@
 
 - (void)capturePhotoRawWithCompletionHandler:(void (^)(UIImage *image, NSError *error))block;
 {
+
+    // capture the device (and hence, image) orientation at the instant they tap
+    // the button
+    UIDeviceOrientation deviceOrientation = [[UIDevice currentDevice] orientation];
+    UIImageOrientation imageOrientation = UIImageOrientationLeft;
+    switch (deviceOrientation) {
+            case UIDeviceOrientationPortrait:
+                imageOrientation = UIImageOrientationRight;
+                break;
+            case UIDeviceOrientationPortraitUpsideDown:
+                imageOrientation = UIImageOrientationLeft;
+                break;
+            case UIDeviceOrientationLandscapeLeft:
+                imageOrientation = UIImageOrientationUp;
+                break;
+            case UIDeviceOrientationLandscapeRight:
+                imageOrientation = UIImageOrientationDown;
+                break;
+            default:
+                imageOrientation = UIImageOrientationRight;
+                break;
+    }
     [photoOutput captureStillImageAsynchronouslyFromConnection:[[photoOutput connections] objectAtIndex:0] completionHandler:^(CMSampleBufferRef imageSampleBuffer, NSError *error) {
         NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageSampleBuffer];
         UIImage *image = [UIImage imageWithData:jpegData];
+        image = [UIImage imageWithCGImage:image.CGImage scale:1. orientation:imageOrientation];
         block(image, error);
     }];
     return;
