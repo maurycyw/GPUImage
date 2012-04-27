@@ -434,7 +434,7 @@ void dataProviderReleaseCallback (void *info, const void *data, size_t size)
         return;
     }
     
-    if ( (CGSizeEqualToSize(inputTextureSize, CGSizeZero)) || (CGSizeEqualToSize(newSize, CGSizeZero)) )
+    if ( (CGSizeEqualToSize(newSize, CGSizeZero)) )
     {
         inputTextureSize = newSize;
     }
