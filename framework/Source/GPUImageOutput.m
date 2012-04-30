@@ -113,7 +113,6 @@ void runOnMainQueueWithoutDeadlocking(void (^block)(void))
 - (void)initializeOutputTexture;
 {
     [GPUImageOpenGLESContext useImageProcessingContext];
-    
     glActiveTexture(GL_TEXTURE0);
     glGenTextures(1, &outputTexture);
 	glBindTexture(GL_TEXTURE_2D, outputTexture);
@@ -123,6 +122,11 @@ void runOnMainQueueWithoutDeadlocking(void (^block)(void))
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    // notify targets
+    for (id<GPUImageInput> target in targets) {
+        [target setInputTexture:outputTexture atIndex:0];
+    }
 }
 
 - (void)deleteOutputTexture;
@@ -131,6 +135,10 @@ void runOnMainQueueWithoutDeadlocking(void (^block)(void))
     {
         glDeleteTextures(1, &outputTexture);
         outputTexture = 0;
+        // notify targets
+        for (id<GPUImageInput> target in targets) {
+            [target setInputTexture:outputTexture atIndex:0];
+        }
     }
 }
 
