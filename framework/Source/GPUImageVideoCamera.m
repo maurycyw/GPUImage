@@ -9,6 +9,9 @@
 	AVCaptureDeviceInput *videoInput;
 	AVCaptureVideoDataOutput *videoOutput;
     NSDate *startingCaptureTime;
+    // we need to keep this flag since calling `stopCapture` doesn't necessarily
+    // mean we won't get another frame.
+    BOOL _isCapturing;
 }
 
 @end
@@ -29,7 +32,7 @@
     {
 		return nil;
     }
-
+    _isCapturing = NO;
     return self;
 }
 
@@ -135,6 +138,7 @@
         startingCaptureTime = [NSDate date];
 		[_captureSession startRunning];
 	};
+    _isCapturing = YES;
 }
 
 - (void)stopCameraCapture;
@@ -143,6 +147,7 @@
     {
         [_captureSession stopRunning];
     }
+    _isCapturing = NO;
 }
 
 - (void)rotateCamera
@@ -204,6 +209,8 @@
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
+    if (NO == _isCapturing)
+        return;
     CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
     CVImageBufferRef cameraFrame = CMSampleBufferGetImageBuffer(sampleBuffer);
     
