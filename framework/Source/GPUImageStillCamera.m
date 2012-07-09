@@ -59,6 +59,9 @@
 - (void)capturePhotoRawWithCompletionHandler:(void (^)(UIImage *image, NSError *error))block;
 {
     [photoOutput captureStillImageAsynchronouslyFromConnection:[[photoOutput connections] objectAtIndex:0] completionHandler:^(CMSampleBufferRef imageSampleBuffer, NSError *error) {
+        if (nil != error || NULL == imageSampleBuffer || !CMSampleBufferIsValid(imageSampleBuffer)) {
+            block(nil, error);
+        }
         NSData *jpegData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageSampleBuffer];
         UIImage *image = [UIImage imageWithData:jpegData];
         // we hard set the orientation to `up` because, honestly, let's not get all excited
